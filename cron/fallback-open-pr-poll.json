@@ -1,0 +1,16 @@
+{
+  "name": "fallback-open-pr-poll",
+  "enabled": true,
+  "schedule": {
+    "kind": "cron",
+    "expr": "*/30 * * * *",
+    "tz": "UTC"
+  },
+  "sessionTarget": "main",
+  "wakeMode": "scheduled",
+  "payload": {
+    "kind": "agentTurn",
+    "message": "Run the fallback-open-pr-poll workflow: poll open PRs in ruh-ai/ruh-dev-fe and review newly discovered PR/head SHAs only.",
+    "timeoutSeconds": 600
+  }
+}

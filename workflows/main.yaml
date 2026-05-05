@@ -1,0 +1,37 @@
+version: 1
+name: main
+steps:
+  - id: data-writer
+    type: skill
+    skill: data-writer
+  - id: normalize
+    type: skill
+    skill: normalize-review-request
+  - id: fetch_context
+    type: skill
+    skill: fetch-github-pr-context
+    depends_on: [normalize]
+  - id: check_dedupe
+    type: skill
+    skill: check-review-dedupe
+    depends_on: [fetch_context]
+  - id: analyze
+    type: skill
+    skill: analyze-pr-risk
+    depends_on: [check_dedupe]
+  - id: format_summary
+    type: skill
+    skill: format-slack-summary
+    depends_on: [analyze]
+  - id: resolve_recipient
+    type: skill
+    skill: resolve-slack-recipient
+    depends_on: [format_summary]
+  - id: send_slack_dm
+    type: native-tool
+    tool: message
+    depends_on: [format_summary, resolve_recipient]
+  - id: persist_records
+    type: skill
+    skill: persist-review-records
+    depends_on: [send_slack_dm, fetch_context, check_dedupe, analyze, format_summary]

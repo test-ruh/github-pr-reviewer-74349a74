@@ -1,0 +1,63 @@
+infrastructure:
+  - key: PG_CONNECTION_STRING
+    label: PostgreSQL connection string used by OpenClaw persistence
+    required: true
+    secret: true
+  - key: DATABASE_URL
+    label: "PostgreSQL connection string used by data_writer.py and read-only dedupe checks"
+    required: true
+    secret: true
+  - key: ORG_ID
+    label: OpenClaw organization id for schema isolation
+    required: true
+    secret: false
+  - key: AGENT_ID
+    label: OpenClaw agent id for schema isolation
+    required: true
+    secret: false
+  - key: RUN_ID
+    label: OpenClaw run id
+    required: false
+    secret: false
+connector:
+  - key: GITHUB_TOKEN
+    label: "Read-only GitHub token for ruh-ai/ruh-dev-fe PR metadata, files, commits, and diffs"
+    required: true
+    secret: true
+  - key: GITHUB_OWNER
+    label: GitHub owner for artifact sync repository
+    required: true
+    secret: false
+  - key: AGENT_REPO_NAME
+    label: GitHub repository name for artifact sync
+    required: true
+    secret: false
+  - key: GITHUB_WEBHOOK_SECRET
+    label: Secret used to validate incoming GitHub pull_request webhook signatures
+    required: true
+    secret: true
+  - key: TARGET_REPOSITORY
+    label: "Only repository this agent may review; default ruh-ai/ruh-dev-fe"
+    required: true
+    secret: false
+  - key: ENABLE_FALLBACK_POLL
+    label: Set true only if GitHub webhook delivery is unavailable
+    required: false
+    secret: false
+  - key: MAX_DIFF_BYTES
+    label: Maximum aggregate diff bytes analyzed before truncation
+    required: false
+    secret: false
+  - key: MAX_FILES_PER_PR
+    label: Maximum changed files inspected per PR
+    required: false
+    secret: false
+channel:
+  - key: SLACK_BOT_TOKEN
+    label: Slack bot token for native OpenClaw Slack DM delivery
+    required: true
+    secret: true
+  - key: SLACK_RECIPIENT_EMAIL
+    label: "Slack DM recipient email; expected shruti@ruh.ai"
+    required: true
+    secret: false

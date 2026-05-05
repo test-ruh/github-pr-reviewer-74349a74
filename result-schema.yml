@@ -1,0 +1,254 @@
+version: "1.0"
+agent_id: "github-pr-reviewer"
+
+tables:
+  result_pr_metadata:
+    description: Latest known metadata for each reviewed or observed GitHub PR/head SHA.
+    writable: true
+    write_mode: upsert
+    columns:
+      id:
+        type: uuid
+        required: true
+      repository_full_name:
+        type: string
+        required: true
+        max_length: 200
+      pr_number:
+        type: integer
+        required: true
+      pr_url:
+        type: string
+        required: true
+        max_length: 500
+      title:
+        type: string
+        required: true
+        max_length: 500
+      author_login:
+        type: string
+        max_length: 120
+      base_branch:
+        type: string
+        max_length: 200
+      head_branch:
+        type: string
+        max_length: 200
+      head_sha:
+        type: string
+        required: true
+        max_length: 80
+      state:
+        type: string
+        required: true
+        max_length: 40
+      opened_at:
+        type: datetime
+      updated_at_github:
+        type: datetime
+      changed_files_count:
+        type: integer
+      additions:
+        type: integer
+      deletions:
+        type: integer
+      raw_metadata:
+        type: jsonb
+      run_id:
+        type: string
+        required: true
+        max_length: 120
+      created_at:
+        type: datetime
+        required: true
+      updated_at:
+        type: datetime
+        required: true
+    conflict_columns:
+      - repository_full_name
+      - pr_number
+      - head_sha
+    indexes:
+      - columns: [repository_full_name, pr_number]
+        name: idx_result_pr_metadata_repo_pr
+      - columns: [head_sha]
+        name: idx_result_pr_metadata_head_sha
+      - columns: [updated_at]
+        name: idx_result_pr_metadata_updated_at
+  result_pr_review_summary:
+    description: Structured review result for each agent review execution.
+    writable: true
+    write_mode: upsert
+    columns:
+      review_id:
+        type: uuid
+        required: true
+      repository_full_name:
+        type: string
+        required: true
+        max_length: 200
+      pr_number:
+        type: integer
+        required: true
+      head_sha:
+        type: string
+        required: true
+        max_length: 80
+      trigger_type:
+        type: string
+        required: true
+        max_length: 80
+      requested_by:
+        type: string
+        max_length: 200
+      risk_level:
+        type: string
+        required: true
+        max_length: 40
+      summary_text:
+        type: text
+        required: true
+      code_quality_findings:
+        type: jsonb
+      bug_risk_findings:
+        type: jsonb
+      performance_findings:
+        type: jsonb
+      files_reviewed:
+        type: jsonb
+      files_skipped:
+        type: jsonb
+      review_status:
+        type: string
+        required: true
+        max_length: 40
+      error_message:
+        type: text
+      reviewed_at:
+        type: datetime
+        required: true
+      run_id:
+        type: string
+        required: true
+        max_length: 120
+      created_at:
+        type: datetime
+        required: true
+      updated_at:
+        type: datetime
+        required: true
+    conflict_columns:
+      - review_id
+    indexes:
+      - columns: [repository_full_name, pr_number, head_sha]
+        name: idx_result_pr_review_summary_pr_sha
+      - columns: [trigger_type, review_status]
+        name: idx_result_pr_review_summary_trigger_status
+      - columns: [reviewed_at]
+        name: idx_result_pr_review_summary_reviewed_at
+  result_slack_notification:
+    description: Slack delivery record for each review summary sent or skipped.
+    writable: true
+    write_mode: upsert
+    columns:
+      id:
+        type: uuid
+        required: true
+      review_id:
+        type: uuid
+        required: true
+      recipient_email:
+        type: string
+        required: true
+        max_length: 320
+      slack_user_id:
+        type: string
+        max_length: 120
+      slack_channel_id:
+        type: string
+        max_length: 120
+      message_ts:
+        type: string
+        max_length: 120
+      delivery_status:
+        type: string
+        required: true
+        max_length: 40
+      error_message:
+        type: text
+      sent_at:
+        type: datetime
+      run_id:
+        type: string
+        required: true
+        max_length: 120
+      created_at:
+        type: datetime
+        required: true
+      updated_at:
+        type: datetime
+        required: true
+    conflict_columns:
+      - review_id
+      - recipient_email
+    indexes:
+      - columns: [recipient_email, delivery_status]
+        name: idx_result_slack_notification_recipient_status
+      - columns: [sent_at]
+        name: idx_result_slack_notification_sent_at
+  result_processed_event:
+    description: Event or polling marker used to suppress duplicate automatic notifications.
+    writable: true
+    write_mode: upsert
+    columns:
+      id:
+        type: uuid
+        required: true
+      source:
+        type: string
+        required: true
+        max_length: 80
+      event_key:
+        type: string
+        required: true
+        max_length: 300
+      repository_full_name:
+        type: string
+        max_length: 200
+      pr_number:
+        type: integer
+      head_sha:
+        type: string
+        max_length: 80
+      action:
+        type: string
+        max_length: 80
+      processed_status:
+        type: string
+        required: true
+        max_length: 40
+      payload_excerpt:
+        type: jsonb
+      processed_at:
+        type: datetime
+        required: true
+      run_id:
+        type: string
+        required: true
+        max_length: 120
+      created_at:
+        type: datetime
+        required: true
+      updated_at:
+        type: datetime
+        required: true
+    conflict_columns:
+      - source
+      - event_key
+    indexes:
+      - columns: [repository_full_name, pr_number, head_sha]
+        name: idx_result_processed_event_pr_sha
+      - columns: [processed_status]
+        name: idx_result_processed_event_status
+      - columns: [processed_at]
+        name: idx_result_processed_event_processed_at
